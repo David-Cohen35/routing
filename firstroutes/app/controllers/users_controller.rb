@@ -1,7 +1,12 @@
 class UsersController < ApplicationController
 
     def index
-        @users = User.all
+        if params[:username]
+            @users = User.where("username LIKE :query", query: "%#{params[:username]}%")
+        else
+            @users = User.all
+        end
+
         render json: @users
     end
 
@@ -12,7 +17,7 @@ class UsersController < ApplicationController
         if @user.save!
             render json: @user
         else
-            render json: @user.errors.full_messages
+            render json: @user.errors.full_messages, status: 422
         end
     end
 
@@ -26,7 +31,7 @@ class UsersController < ApplicationController
         @user = User.find(params[:id])
 
         if @user.update(user_params)
-            redirect_to user_url(@user.id) # or squeak_url(id) coz rails is smart
+            redirect_to user_url(@user.id) 
         else
             render json: @user.errors.full_messages, status: 422
         end
@@ -36,7 +41,8 @@ class UsersController < ApplicationController
     def destroy
         @user = User.find(params[:id])
         @user.destroy
-        redirect_to users_url
+        #redirect_to users_url
+        render json: @user
     end
 
     private
